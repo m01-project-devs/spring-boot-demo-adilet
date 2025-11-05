@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class HelloWorldService {
 
     public String sayHelloTo(String name) {
-        if (name == null || name.trim().isEmpty()) {
+        if (name == null || name.isBlank()) {
             return "Error: In Islam, a child is named through Azan — please provide a name!";
         }
         return "Hello " + name;

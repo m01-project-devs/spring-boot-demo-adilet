@@ -17,6 +17,6 @@ class HelloWorldServiceTest {
 
     @Test
     void testSayHelloWithoutName() {
-        assertEquals("Error: noName!", service.sayHelloTo(""));
+        assertEquals("Error: In Islam, a child is named through Azan — please provide a name!", service.sayHelloTo(""));
     }
 }

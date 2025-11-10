@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.m01project</groupId>
-	<artifactId>task-manager</artifactId>
+	<artifactId>spring-boot-demo-adilet</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>task-manager</name>
 	<description>Full-stack task management (Spring Boot 3)</description>

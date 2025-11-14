@@ -19,6 +19,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
         return userRepository.save(user);
     }
 
@@ -40,12 +43,12 @@ public class UserServiceImpl implements UserService {
                     existingUser.setPassword(user.getPassword());
                     return userRepository.save(existingUser);
                 })
-                .orElseThrow(() -> new RuntimeException("User not found" ));
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-    
+
 }

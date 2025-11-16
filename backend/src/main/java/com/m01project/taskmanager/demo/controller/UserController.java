@@ -1,12 +1,14 @@
 package com.m01project.taskmanager.demo.controller;
 
-import com.m01project.taskmanager.demo.dto.UserResponseDto;
-import com.m01project.taskmanager.demo.service.UserService;
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
+import com.m01project.taskmanager.demo.dto.UserResponseDto;
+import com.m01project.taskmanager.demo.entity.User;
+import com.m01project.taskmanager.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,17 +20,23 @@ public class UserController {
     @GetMapping("/{email}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable String email) {
         return userService.getUserByEmail(email)
-                .map(user -> ResponseEntity.ok(new UserResponseDto(user.getEmail(), user.getCreatedAt())))
+                .map(user -> ResponseEntity.ok(new UserResponseDto(
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getPhoneNumber(),
+                        user.getCreatedAt()
+                )))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequestDto) {
-        return ResponseEntity.ok(userService.createUser(userRequestDto));
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
+        return ResponseEntity.ok(userService.createUser(dto));
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 }

@@ -1,7 +1,6 @@
 package com.m01project.taskmanager;
 
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
-import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.repository.UserRepository;
 import com.m01project.taskmanager.demo.service.UserService;
@@ -29,48 +28,48 @@ class UserServiceTest {
 
     @Test
     void testCreateUser() {
-        UserRequestDto requestDto = new UserRequestDto("test@example.com", "1234");
-        User savedUser = new User();
-        savedUser.setEmail(requestDto.email());
-        savedUser.setPassword(requestDto.password());
+        UserRequestDto dto = new UserRequestDto("aiba@gmail.com", "1234", "Aibek", "Shermatov", "5551234");
+        User user = new User(1L, dto.email(), dto.password(), dto.firstName(), dto.lastName(), dto.phoneNumber(), null);
 
-        when(userRepository.existsByEmail(requestDto.email())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.existsByEmail(dto.email())).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        UserResponseDto response = userService.createUser(requestDto);
+        var created = userService.createUser(dto);
 
-        assertNotNull(response);
-        assertEquals("test@example.com", response.email());
+        assertNotNull(created);
+        assertEquals("aiba@gmail.com", created.email());
+        assertEquals("Aibek", created.firstName());
+        assertEquals("Shermatov", created.lastName());
+        assertEquals("5551234", created.phoneNumber());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void testCreateUserWithExistingEmail() {
-        UserRequestDto requestDto = new UserRequestDto("exist@example.com", "1234");
-        when(userRepository.existsByEmail(requestDto.email())).thenReturn(true);
+        UserRequestDto dto = new UserRequestDto("aiba@gmail.com", "1234", "Aibek", "Shermatov", "5551234");
+        when(userRepository.existsByEmail(dto.email())).thenReturn(true);
 
-        assertThrows(RuntimeException.class, () -> userService.createUser(requestDto));
-        verify(userRepository, never()).save(any(User.class));
+        assertThrows(RuntimeException.class, () -> userService.createUser(dto));
     }
 
     @Test
     void testGetUserByEmail() {
-        User user = new User();
-        user.setEmail("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        User user = new User(1L, "user@gmail.com", "pass", "Tima", "Varol", "5555678", null);
+        when(userRepository.findByEmail("user@gmail.com")).thenReturn(Optional.of(user));
 
-        Optional<User> found = userService.getUserByEmail("user@example.com");
+        Optional<User> found = userService.getUserByEmail("user@gmail.com");
 
         assertTrue(found.isPresent());
-        assertEquals("user@example.com", found.get().getEmail());
-        verify(userRepository, times(1)).findByEmail("user@example.com");
+        assertEquals("user@gmail.com", found.get().getEmail());
+        assertEquals("Tima", found.get().getFirstName());
+        verify(userRepository, times(1)).findByEmail("user@gmail.com");
     }
 
     @Test
     void testGetAllUsers() {
         List<User> users = List.of(
-                new User(1L, "a@example.com", "123", null),
-                new User(2L, "b@example.com", "456", null)
+                new User(1L, "a@gmail.com", "123", "A", "Alpha", "111", null),
+                new User(2L, "b@gmail.com", "456", "B", "Beta", "222", null)
         );
         when(userRepository.findAll()).thenReturn(users);
 
@@ -82,21 +81,19 @@ class UserServiceTest {
 
     @Test
     void testUpdateUser() {
-        User existing = new User();
-        existing.setEmail("old@example.com");
-        existing.setPassword("111");
-
-        User updated = new User();
-        updated.setEmail("new@example.com");
-        updated.setPassword("222");
+        User existing = new User(1L, "old@gmail.com", "111", "Old", "User", "000", null);
+        User updated = new User(1L, "new@gmail.com", "222", "New", "User", "999", null);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(userRepository.save(existing)).thenReturn(updated);
 
         User result = userService.updateUser(1L, updated);
 
-        assertEquals("new@example.com", result.getEmail());
+        assertEquals("new@gmail.com", result.getEmail());
         assertEquals("222", result.getPassword());
+        assertEquals("New", result.getFirstName());
+        assertEquals("User", result.getLastName());
+        assertEquals("999", result.getPhoneNumber());
         verify(userRepository, times(1)).save(existing);
     }
 

@@ -17,7 +17,8 @@ public class UserController {
 
     private final UserService userService;
 
-    // email artık request param ile alınıyor
+
+    // GET user by email using RequestParam
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
         return userService.getUserByEmail(email)
@@ -31,11 +32,13 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // POST create user
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
         return ResponseEntity.ok(userService.createUser(dto));
     }
 
+    // GET all users
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());

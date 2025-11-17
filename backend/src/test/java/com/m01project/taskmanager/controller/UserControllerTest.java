@@ -1,4 +1,4 @@
-package com.m01project.taskmanager;
+package com.m01project.taskmanager.controller;
 
 import com.m01project.taskmanager.demo.controller.UserController;
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
@@ -40,7 +40,7 @@ class UserControllerTest {
         when(userService.getUserByEmail("adilet@gmail.com")).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/users")
-                        .param("email", "adilet@gmail.com"))
+                .param("email", "adilet@gmail.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("adilet@gmail.com"))
                 .andExpect(jsonPath("$.firstName").value("Adilet"))
@@ -53,28 +53,29 @@ class UserControllerTest {
         when(userService.getUserByEmail("noone@gmail.com")).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/users")
-                        .param("email", "noone@gmail.com"))
+                .param("email", "noone@gmail.com"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void testCreateUser() throws Exception {
         UserRequestDto dto = new UserRequestDto("new@gmail.com", "pass123", "New", "User", "5552222");
-        User user = new User(1L, dto.email(), dto.password(), dto.firstName(), dto.lastName(), dto.phoneNumber(), LocalDateTime.now());
+        User user = new User(1L, dto.email(), dto.password(), dto.firstName(), dto.lastName(), dto.phoneNumber(),
+                LocalDateTime.now());
 
         when(userService.createUser(dto)).thenReturn(
                 new com.m01project.taskmanager.demo.dto.UserResponseDto(
-                        user.getEmail(), user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getCreatedAt()
-                )
-        );
+                        user.getEmail(), user.getFirstName(), user.getLastName(), user.getPhoneNumber(),
+                        user.getCreatedAt()));
 
         mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("new@gmail.com"))
                 .andExpect(jsonPath("$.firstName").value("New"))
                 .andExpect(jsonPath("$.lastName").value("User"))
                 .andExpect(jsonPath("$.phoneNumber").value("5552222"));
+
     }
 }

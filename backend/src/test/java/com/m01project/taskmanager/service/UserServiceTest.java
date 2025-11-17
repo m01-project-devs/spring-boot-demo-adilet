@@ -1,4 +1,4 @@
-package com.m01project.taskmanager;
+package com.m01project.taskmanager.service;
 
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.entity.User;

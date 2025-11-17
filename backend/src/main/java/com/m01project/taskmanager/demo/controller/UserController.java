@@ -17,8 +17,9 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/{email}")
-    public ResponseEntity<UserResponseDto> getUser(@PathVariable String email) {
+    // email artık request param ile alınıyor
+    @GetMapping
+    public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
         return userService.getUserByEmail(email)
                 .map(user -> ResponseEntity.ok(new UserResponseDto(
                         user.getEmail(),
@@ -35,7 +36,7 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(dto));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

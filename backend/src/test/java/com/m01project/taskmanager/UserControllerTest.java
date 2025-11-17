@@ -33,7 +33,7 @@ class UserControllerTest {
 
     @Test
     void testGetUser() throws Exception {
-        User user = new User(1L, "adilet@gmail.com", "1234", "Adilet", "Dzhuraev", "555-1111", null);
+        User user = new User(1L, "adilet@gmail.com", "1234", "Adilet", "Dzhuraev", "5551111", null);
         when(userService.getUserByEmail("adilet@gmail.com")).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/users/adilet@gmail.com"))
@@ -54,7 +54,7 @@ class UserControllerTest {
 
     @Test
     void testCreateUser() throws Exception {
-        UserRequestDto dto = new UserRequestDto("new@gmail.com", "pass123", "New", "User", "555-2222");
+        UserRequestDto dto = new UserRequestDto("new@gmail.com", "pass123", "New", "User", "5552222");
         User user = new User(1L, dto.email(), dto.password(), dto.firstName(), dto.lastName(), dto.phoneNumber(), null);
 
         when(userService.createUser(dto)).thenReturn(

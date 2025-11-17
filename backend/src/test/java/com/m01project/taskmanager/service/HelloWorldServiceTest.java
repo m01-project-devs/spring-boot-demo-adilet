@@ -1,4 +1,4 @@
-package com.m01project.taskmanager;
+package com.m01project.taskmanager.service;
 
 import org.junit.jupiter.api.Test;
 

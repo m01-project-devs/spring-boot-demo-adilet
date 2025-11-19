@@ -1,5 +1,7 @@
 package com.m01project.taskmanager.demo.service.impl;
 
+import com.m01project.taskmanager.demo.dto.UserRequestDto;
+import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.repository.UserRepository;
 import com.m01project.taskmanager.demo.service.UserService;
@@ -18,13 +20,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        if (userRepository.existsByEmail(userRequestDto.email())) {
+            throw new RuntimeException("Email already in use");
+        }
+
+        User user = new User();
+        user.setEmail(userRequestDto.email());
+        user.setPassword(userRequestDto.password());
+
+        User savedUser = userRepository.save(user);
+
+        return new UserResponseDto(savedUser.getEmail(), savedUser.getCreatedAt());
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Override
@@ -40,12 +52,11 @@ public class UserServiceImpl implements UserService {
                     existingUser.setPassword(user.getPassword());
                     return userRepository.save(existingUser);
                 })
-                .orElseThrow(() -> new RuntimeException("User not found" ));
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-    
 }

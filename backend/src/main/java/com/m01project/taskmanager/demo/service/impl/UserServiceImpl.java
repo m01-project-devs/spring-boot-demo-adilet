@@ -20,18 +20,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto createUser(UserRequestDto userRequestDto) {
-        if (userRepository.existsByEmail(userRequestDto.email())) {
+    public UserResponseDto createUser(UserRequestDto dto) {
+        if (userRepository.existsByEmail(dto.email())) {
             throw new RuntimeException("Email already in use");
         }
 
-        User user = new User();
-        user.setEmail(userRequestDto.email());
-        user.setPassword(userRequestDto.password());
+        User user = User.builder()
+                .email(dto.email())
+                .password(dto.password())
+                .firstName(dto.firstName())
+                .lastName(dto.lastName())
+                .phoneNumber(dto.phoneNumber())
+                .build();
 
-        User savedUser = userRepository.save(user);
+        User createdUser = userRepository.save(user);
 
-        return new UserResponseDto(savedUser.getEmail(), savedUser.getCreatedAt());
+        return new UserResponseDto(
+                createdUser.getEmail(),
+                createdUser.getFirstName(),
+                createdUser.getLastName(),
+                createdUser.getPhoneNumber(),
+                createdUser.getCreatedAt()
+        );
     }
 
     @Override
@@ -50,6 +60,9 @@ public class UserServiceImpl implements UserService {
                 .map(existingUser -> {
                     existingUser.setEmail(user.getEmail());
                     existingUser.setPassword(user.getPassword());
+                    existingUser.setFirstName(user.getFirstName());
+                    existingUser.setLastName(user.getLastName());
+                    existingUser.setPhoneNumber(user.getPhoneNumber());
                     return userRepository.save(existingUser);
                 })
                 .orElseThrow(() -> new RuntimeException("User not found"));

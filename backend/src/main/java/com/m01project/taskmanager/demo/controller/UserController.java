@@ -17,12 +17,16 @@ public class UserController {
 
     private final UserService userService;
 
+
     // GET user by email using RequestParam
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
         return userService.getUserByEmail(email)
                 .map(user -> ResponseEntity.ok(new UserResponseDto(
                         user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getPhoneNumber(),
                         user.getCreatedAt()
                 )))
                 .orElse(ResponseEntity.notFound().build());
@@ -30,8 +34,8 @@ public class UserController {
 
     // POST create user
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequestDto) {
-        return ResponseEntity.ok(userService.createUser(userRequestDto));
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
+        return ResponseEntity.ok(userService.createUser(dto));
     }
 
     // GET all users

@@ -4,6 +4,8 @@ import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.service.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +26,6 @@ public class UserController {
 
     private final UserService userService;
 
-
     // GET user by email using RequestParam
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
@@ -34,8 +35,7 @@ public class UserController {
                         user.getFirstName(),
                         user.getLastName(),
                         user.getPhoneNumber(),
-                        user.getCreatedAt()
-                )))
+                        user.getCreatedAt())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -49,22 +49,23 @@ public class UserController {
                         u.getFirstName(),
                         u.getLastName(),
                         u.getPhoneNumber(),
-                        u.getCreatedAt()
-                ))
+                        u.getCreatedAt()))
                 .toList();
         return ResponseEntity.ok(users);
     }
 
     // POST create user
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
+    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto dto) {
         UserResponseDto created = userService.createUser(dto);
         return ResponseEntity.status(201).body(created);
     }
 
     // PUT update user by email
     @PutMapping
-    public ResponseEntity<UserResponseDto> updateUser(@RequestParam String email, @RequestBody UserRequestDto dto) {
+    public ResponseEntity<UserResponseDto> updateUser(
+            @RequestParam String email,
+            @Valid @RequestBody UserRequestDto dto) {
         User updatedUser = userService.getUserByEmail(email)
                 .map(existing -> userService.updateUser(existing.getId(), new User(
                         existing.getId(),
@@ -73,8 +74,7 @@ public class UserController {
                         dto.firstName(),
                         dto.lastName(),
                         dto.phoneNumber(),
-                        existing.getCreatedAt()
-                )))
+                        existing.getCreatedAt())))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserResponseDto response = new UserResponseDto(
@@ -82,8 +82,7 @@ public class UserController {
                 updatedUser.getFirstName(),
                 updatedUser.getLastName(),
                 updatedUser.getPhoneNumber(),
-                updatedUser.getCreatedAt()
-        );
+                updatedUser.getCreatedAt());
 
         return ResponseEntity.ok(response);
     }

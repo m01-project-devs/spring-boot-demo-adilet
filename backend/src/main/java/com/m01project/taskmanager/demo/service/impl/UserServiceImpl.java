@@ -7,6 +7,7 @@ import com.m01project.taskmanager.demo.repository.UserRepository;
 import com.m01project.taskmanager.demo.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,29 +21,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto createUser(UserRequestDto dto) {
-        if (userRepository.existsByEmail(dto.email())) {
-            throw new RuntimeException("Email already in use");
-        }
-
-        User user = User.builder()
-                .email(dto.email())
-                .password(dto.password())
-                .firstName(dto.firstName())
-                .lastName(dto.lastName())
-                .phoneNumber(dto.phoneNumber())
-                .build();
-
-        User createdUser = userRepository.save(user);
-
-        return new UserResponseDto(
-                createdUser.getEmail(),
-                createdUser.getFirstName(),
-                createdUser.getLastName(),
-                createdUser.getPhoneNumber(),
-                createdUser.getCreatedAt()
-        );
+public UserResponseDto createUser(UserRequestDto dto) {
+    if (userRepository.existsByEmail(dto.email())) {
+        throw new RuntimeException("Email already in use");
     }
+
+    User user = User.builder()
+            .email(dto.email())
+            .password(dto.password())
+            .firstName(dto.firstName())
+            .lastName(dto.lastName())
+            .phoneNumber(dto.phoneNumber())
+            .createdAt(LocalDateTime.now()) 
+            .build();
+
+    User createdUser = userRepository.save(user);
+
+    return new UserResponseDto(
+            createdUser.getEmail(),
+            createdUser.getFirstName(),
+            createdUser.getLastName(),
+            createdUser.getPhoneNumber(),
+            createdUser.getCreatedAt()
+    );
+}
 
     @Override
     public Optional<User> getUserByEmail(String email) {

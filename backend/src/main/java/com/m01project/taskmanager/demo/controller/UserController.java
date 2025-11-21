@@ -5,6 +5,8 @@ import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +26,7 @@ public class UserController {
 
     private final UserService userService;
 
-
-    // GET user by email using RequestParam
+    // GET user by email
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
         return userService.getUserByEmail(email)
@@ -59,41 +60,20 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
         UserResponseDto created = userService.createUser(dto);
-        return ResponseEntity.status(201).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // PUT update user by email
     @PutMapping
     public ResponseEntity<UserResponseDto> updateUser(@RequestParam String email, @RequestBody UserRequestDto dto) {
-        User updatedUser = userService.getUserByEmail(email)
-                .map(existing -> userService.updateUser(existing.getId(), new User(
-                        existing.getId(),
-                        dto.email(),
-                        dto.password(),
-                        dto.firstName(),
-                        dto.lastName(),
-                        dto.phoneNumber(),
-                        existing.getCreatedAt()
-                )))
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        UserResponseDto response = new UserResponseDto(
-                updatedUser.getEmail(),
-                updatedUser.getFirstName(),
-                updatedUser.getLastName(),
-                updatedUser.getPhoneNumber(),
-                updatedUser.getCreatedAt()
-        );
-
-        return ResponseEntity.ok(response);
+        UserResponseDto updated = userService.updateUserByEmail(email, dto);
+        return ResponseEntity.ok(updated);
     }
 
     // DELETE user by email
     @DeleteMapping
     public ResponseEntity<Void> deleteUser(@RequestParam String email) {
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        userService.deleteUser(user.getId());
+        userService.deleteUserByEmail(email);
         return ResponseEntity.noContent().build();
     }
 }

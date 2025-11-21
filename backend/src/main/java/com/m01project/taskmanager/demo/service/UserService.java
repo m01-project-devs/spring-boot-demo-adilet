@@ -10,6 +10,6 @@ public interface UserService {
     UserResponseDto createUser(UserRequestDto userRequestDto);
     Optional<User> getUserByEmail(String email);
     List<User> getAllUsers();
-    User updateUser(Long id, User user);
-    void deleteUser(Long id);
+    UserResponseDto updateUserByEmail(String email, UserRequestDto dto);
+    void deleteUserByEmail(String email);
 }

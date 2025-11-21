@@ -5,8 +5,17 @@ import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,8 +26,7 @@ public class UserController {
 
     private final UserService userService;
 
-
-    // GET user by email using RequestParam
+    // GET user by email
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
         return userService.getUserByEmail(email)
@@ -32,15 +40,40 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // GET all users
+    @GetMapping("/all")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        List<UserResponseDto> users = userService.getAllUsers()
+                .stream()
+                .map(u -> new UserResponseDto(
+                        u.getEmail(),
+                        u.getFirstName(),
+                        u.getLastName(),
+                        u.getPhoneNumber(),
+                        u.getCreatedAt()
+                ))
+                .toList();
+        return ResponseEntity.ok(users);
+    }
+
     // POST create user
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
-        return ResponseEntity.ok(userService.createUser(dto));
+        UserResponseDto created = userService.createUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // GET all users
-    @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    // PUT update user by email
+    @PutMapping
+    public ResponseEntity<UserResponseDto> updateUser(@RequestParam String email, @RequestBody UserRequestDto dto) {
+        UserResponseDto updated = userService.updateUserByEmail(email, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    // DELETE user by email
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser(@RequestParam String email) {
+        userService.deleteUserByEmail(email);
+        return ResponseEntity.noContent().build();
     }
 }

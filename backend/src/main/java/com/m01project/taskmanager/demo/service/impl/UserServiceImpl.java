@@ -21,30 +21,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-public UserResponseDto createUser(UserRequestDto dto) {
-    if (userRepository.existsByEmail(dto.email())) {
-        throw new RuntimeException("Email already in use");
+    public UserResponseDto createUser(UserRequestDto dto) {
+        if (userRepository.existsByEmail(dto.email())) {
+            throw new RuntimeException("Email already in use");
+        }
+
+        User user = User.builder()
+                .email(dto.email())
+                .password(dto.password())
+                .firstName(dto.firstName())
+                .lastName(dto.lastName())
+                .phoneNumber(dto.phoneNumber())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        User createdUser = userRepository.save(user);
+
+        return new UserResponseDto(
+                createdUser.getEmail(),
+                createdUser.getFirstName(),
+                createdUser.getLastName(),
+                createdUser.getPhoneNumber(),
+                createdUser.getCreatedAt());
     }
-
-    User user = User.builder()
-            .email(dto.email())
-            .password(dto.password())
-            .firstName(dto.firstName())
-            .lastName(dto.lastName())
-            .phoneNumber(dto.phoneNumber())
-            .createdAt(LocalDateTime.now()) 
-            .build();
-
-    User createdUser = userRepository.save(user);
-
-    return new UserResponseDto(
-            createdUser.getEmail(),
-            createdUser.getFirstName(),
-            createdUser.getLastName(),
-            createdUser.getPhoneNumber(),
-            createdUser.getCreatedAt()
-    );
-}
 
     @Override
     public Optional<User> getUserByEmail(String email) {
@@ -57,21 +56,30 @@ public UserResponseDto createUser(UserRequestDto dto) {
     }
 
     @Override
-    public User updateUser(Long id, User user) {
-        return userRepository.findById(id)
-                .map(existingUser -> {
-                    existingUser.setEmail(user.getEmail());
-                    existingUser.setPassword(user.getPassword());
-                    existingUser.setFirstName(user.getFirstName());
-                    existingUser.setLastName(user.getLastName());
-                    existingUser.setPhoneNumber(user.getPhoneNumber());
-                    return userRepository.save(existingUser);
-                })
+    public UserResponseDto updateUserByEmail(String email, UserRequestDto dto) {
+        User existingUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        existingUser.setEmail(dto.email());
+        existingUser.setPassword(dto.password());
+        existingUser.setFirstName(dto.firstName());
+        existingUser.setLastName(dto.lastName());
+        existingUser.setPhoneNumber(dto.phoneNumber());
+
+        User updatedUser = userRepository.save(existingUser);
+
+        return new UserResponseDto(
+                updatedUser.getEmail(),
+                updatedUser.getFirstName(),
+                updatedUser.getLastName(),
+                updatedUser.getPhoneNumber(),
+                updatedUser.getCreatedAt());
     }
 
     @Override
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+    public void deleteUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        userRepository.deleteById(user.getId());
     }
 }

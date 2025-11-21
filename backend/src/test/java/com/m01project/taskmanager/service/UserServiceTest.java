@@ -1,6 +1,7 @@
 package com.m01project.taskmanager.service;
 
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
+import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.repository.UserRepository;
 import com.m01project.taskmanager.demo.service.UserService;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -77,8 +79,7 @@ class UserServiceTest {
     void testGetAllUsers() {
         List<User> users = List.of(
                 new User(1L, "a@gmail.com", "123", "A", "Alpha", "111", null),
-                new User(2L, "b@gmail.com", "456", "B", "Beta", "222", null)
-        );
+                new User(2L, "b@gmail.com", "456", "B", "Beta", "222", null));
         when(userRepository.findAll()).thenReturn(users);
 
         List<User> result = userService.getAllUsers();
@@ -88,28 +89,31 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdateUser() {
-        User existing = new User(1L, "old@gmail.com", "111", "Old", "User", "000", null);
-        User updated = new User(1L, "new@gmail.com", "222", "New", "User", "999", null);
+    void testUpdateUserByEmail() {
+        UserRequestDto dto = new UserRequestDto("new@gmail.com", "pass222", "New", "User", "999999");
+        User existing = new User(1L, "old@gmail.com", "pass111", "Old", "User", "555555", LocalDateTime.now());
+        User updated = new User(1L, dto.email(), dto.password(), dto.firstName(), dto.lastName(), dto.phoneNumber(),
+                existing.getCreatedAt());
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(userRepository.findByEmail("old@gmail.com")).thenReturn(Optional.of(existing));
         when(userRepository.save(existing)).thenReturn(updated);
 
-        User result = userService.updateUser(1L, updated);
+        UserResponseDto result = userService.updateUserByEmail("old@gmail.com", dto);
 
-        assertEquals("new@gmail.com", result.getEmail());
-        assertEquals("222", result.getPassword());
-        assertEquals("New", result.getFirstName());
-        assertEquals("User", result.getLastName());
-        assertEquals("999", result.getPhoneNumber());
+        assertEquals("new@gmail.com", result.email());
+        assertEquals("New", result.firstName());
+        assertEquals("User", result.lastName());
+        assertEquals("999999", result.phoneNumber());
         verify(userRepository, times(1)).save(existing);
     }
 
     @Test
-    void testDeleteUser() {
+    void testDeleteUserByEmail() {
+        User existing = new User(1L, "delete@gmail.com", "pass", "Del", "User", "555", LocalDateTime.now());
+        when(userRepository.findByEmail("delete@gmail.com")).thenReturn(Optional.of(existing));
         doNothing().when(userRepository).deleteById(1L);
 
-        userService.deleteUser(1L);
+        userService.deleteUserByEmail("delete@gmail.com");
 
         verify(userRepository, times(1)).deleteById(1L);
     }

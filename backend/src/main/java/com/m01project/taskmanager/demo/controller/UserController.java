@@ -4,6 +4,10 @@ import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.service.UserService;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -26,7 +30,7 @@ public class UserController {
 
     private final UserService userService;
 
-    // GET user by email
+    // GET user by email using RequestParam
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
         return userService.getUserByEmail(email)
@@ -35,8 +39,7 @@ public class UserController {
                         user.getFirstName(),
                         user.getLastName(),
                         user.getPhoneNumber(),
-                        user.getCreatedAt()
-                )))
+                        user.getCreatedAt())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -50,29 +53,28 @@ public class UserController {
                         u.getFirstName(),
                         u.getLastName(),
                         u.getPhoneNumber(),
-                        u.getCreatedAt()
-                ))
+                        u.getCreatedAt()))
                 .toList();
         return ResponseEntity.ok(users);
     }
 
     // POST create user
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
+    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto dto) {
         UserResponseDto created = userService.createUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // PUT update user by email
     @PutMapping
-    public ResponseEntity<UserResponseDto> updateUser(@RequestParam String email, @RequestBody UserRequestDto dto) {
+    public ResponseEntity<UserResponseDto> updateUser(@RequestParam @NotBlank @Email String email, @RequestBody @Valid UserRequestDto dto) {
         UserResponseDto updated = userService.updateUserByEmail(email, dto);
         return ResponseEntity.ok(updated);
     }
 
     // DELETE user by email
     @DeleteMapping
-    public ResponseEntity<Void> deleteUser(@RequestParam String email) {
+    public ResponseEntity<Void> deleteUser(@RequestParam @NotBlank @Email String email) {
         userService.deleteUserByEmail(email);
         return ResponseEntity.noContent().build();
     }

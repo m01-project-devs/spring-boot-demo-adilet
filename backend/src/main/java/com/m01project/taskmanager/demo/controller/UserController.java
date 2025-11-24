@@ -2,16 +2,16 @@ package com.m01project.taskmanager.demo.controller;
 
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.dto.UserResponseDto;
-import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.service.UserService;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,13 +26,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
+@Validated  
 public class UserController {
 
     private final UserService userService;
 
     // GET user by email using RequestParam
     @GetMapping
-    public ResponseEntity<UserResponseDto> getUser(@RequestParam String email) {
+    public ResponseEntity<UserResponseDto> getUser(@RequestParam @NotBlank @Email String email) {
         return userService.getUserByEmail(email)
                 .map(user -> ResponseEntity.ok(new UserResponseDto(
                         user.getEmail(),
@@ -40,7 +41,8 @@ public class UserController {
                         user.getLastName(),
                         user.getPhoneNumber(),
                         user.getCreatedAt())))
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new com.m01project.taskmanager.demo.exception.UserNotFoundException(
+                        "User not found with email: " + email));
     }
 
     // GET all users
@@ -67,7 +69,8 @@ public class UserController {
 
     // PUT update user by email
     @PutMapping
-    public ResponseEntity<UserResponseDto> updateUser(@RequestParam @NotBlank @Email String email, @RequestBody @Valid UserRequestDto dto) {
+    public ResponseEntity<UserResponseDto> updateUser(@RequestParam @NotBlank @Email String email,
+                                                      @RequestBody @Valid UserRequestDto dto) {
         UserResponseDto updated = userService.updateUserByEmail(email, dto);
         return ResponseEntity.ok(updated);
     }

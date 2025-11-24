@@ -3,9 +3,12 @@ package com.m01project.taskmanager.demo.service.impl;
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
+import com.m01project.taskmanager.demo.exception.EmailAlreadyExistsException;
+import com.m01project.taskmanager.demo.exception.UserNotFoundException;
 import com.m01project.taskmanager.demo.repository.UserRepository;
 import com.m01project.taskmanager.demo.service.UserService;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto createUser(UserRequestDto dto) {
         if (userRepository.existsByEmail(dto.email())) {
-            throw new RuntimeException("Email already in use");
+            throw new EmailAlreadyExistsException("Email already in use " + dto.email());
         }
 
         User user = User.builder()
@@ -58,7 +61,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto updateUserByEmail(String email, UserRequestDto dto) {
         User existingUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
 
         existingUser.setEmail(dto.email());
         existingUser.setPassword(dto.password());
@@ -79,7 +82,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
         userRepository.deleteById(user.getId());
     }
 }

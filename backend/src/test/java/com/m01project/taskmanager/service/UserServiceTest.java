@@ -3,6 +3,8 @@ package com.m01project.taskmanager.service;
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.dto.UserResponseDto;
 import com.m01project.taskmanager.demo.entity.User;
+import com.m01project.taskmanager.demo.exception.EmailAlreadyExistsException;
+import com.m01project.taskmanager.demo.exception.UserNotFoundException;
 import com.m01project.taskmanager.demo.repository.UserRepository;
 import com.m01project.taskmanager.demo.service.UserService;
 import com.m01project.taskmanager.demo.service.impl.UserServiceImpl;
@@ -19,8 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,7 +42,8 @@ class UserServiceTest {
     @Test
     void testCreateUser() {
         UserRequestDto dto = new UserRequestDto("aiba@gmail.com", "1234", "Aibek", "Shermatov", "5551234");
-        User user = new User(1L, dto.email(), dto.password(), dto.firstName(), dto.lastName(), dto.phoneNumber(), null);
+        User user = new User(1L, dto.email(), dto.password(), dto.firstName(), dto.lastName(), dto.phoneNumber(),
+                LocalDateTime.now());
 
         when(userRepository.existsByEmail(dto.email())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -59,12 +63,13 @@ class UserServiceTest {
         UserRequestDto dto = new UserRequestDto("aiba@gmail.com", "1234", "Aibek", "Shermatov", "5551234");
         when(userRepository.existsByEmail(dto.email())).thenReturn(true);
 
-        assertThrows(RuntimeException.class, () -> userService.createUser(dto));
+        assertThrows(EmailAlreadyExistsException.class, () -> userService.createUser(dto));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     void testGetUserByEmail() {
-        User user = new User(1L, "user@gmail.com", "pass", "Tima", "Varol", "5555678", null);
+        User user = new User(1L, "user@gmail.com", "pass", "Tima", "Varol", "5555678", LocalDateTime.now());
         when(userRepository.findByEmail("user@gmail.com")).thenReturn(Optional.of(user));
 
         Optional<User> found = userService.getUserByEmail("user@gmail.com");
@@ -78,8 +83,8 @@ class UserServiceTest {
     @Test
     void testGetAllUsers() {
         List<User> users = List.of(
-                new User(1L, "a@gmail.com", "123", "A", "Alpha", "111", null),
-                new User(2L, "b@gmail.com", "456", "B", "Beta", "222", null));
+                new User(1L, "a@gmail.com", "123", "A", "Alpha", "111", LocalDateTime.now()),
+                new User(2L, "b@gmail.com", "456", "B", "Beta", "222", LocalDateTime.now()));
         when(userRepository.findAll()).thenReturn(users);
 
         List<User> result = userService.getAllUsers();
@@ -116,5 +121,32 @@ class UserServiceTest {
         userService.deleteUserByEmail("delete@gmail.com");
 
         verify(userRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void testGetUserByEmailNotFound() {
+        when(userRepository.findByEmail("notfound@gmail.com")).thenReturn(Optional.empty());
+
+        Optional<User> found = userService.getUserByEmail("notfound@gmail.com");
+        assertTrue(found.isEmpty());
+        verify(userRepository, times(1)).findByEmail("notfound@gmail.com");
+    }
+
+    @Test
+    void testUpdateUserByEmailNotFound() {
+        UserRequestDto dto = new UserRequestDto(
+                "new@gmail.com", "pass222", "New", "User", "999999");
+        when(userRepository.findByEmail("notfound@gmail.com")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.updateUserByEmail("notfound@gmail.com", dto));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void testDeleteUserByEmailNotFound() {
+        when(userRepository.findByEmail("notfound@gmail.com")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUserByEmail("notfound@gmail.com"));
+        verify(userRepository, never()).deleteById(anyLong());
     }
 }

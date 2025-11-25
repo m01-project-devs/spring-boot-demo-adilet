@@ -13,6 +13,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestBody Map<String, String> body) {
-        return "login endpoint called for user: " + body.get("email");
+        return "login endpoint called for user";
     }
 }

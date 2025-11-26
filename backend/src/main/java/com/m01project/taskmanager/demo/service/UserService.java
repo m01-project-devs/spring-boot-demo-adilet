@@ -14,5 +14,5 @@ public interface UserService {
     List<User> getAllUsers();
     UserResponseDto updateUserByEmail(String email, UserRequestDto dto);
     void deleteUserByEmail(String email);
-    Page<User> getAllUsers(Pageable pageable);
+    Page<UserResponseDto> getUsersPaged(Pageable pageable);
 }

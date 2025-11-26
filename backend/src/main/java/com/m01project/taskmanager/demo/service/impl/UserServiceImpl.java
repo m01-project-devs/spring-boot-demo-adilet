@@ -10,6 +10,7 @@ import com.m01project.taskmanager.demo.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -89,7 +90,14 @@ public class UserServiceImpl implements UserService {
 
     // Pagination
     @Override
-    public Page<User> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public Page<UserResponseDto> getUsersPaged(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAll(pageable);
+
+        return usersPage.map(u -> new UserResponseDto(
+                u.getEmail(),
+                u.getFirstName(),
+                u.getLastName(),
+                u.getPhoneNumber(),
+                u.getCreatedAt()));
     }
 }

@@ -88,16 +88,7 @@ public class UserController {
 
     // Pagination
     @GetMapping("/paged")
-    public ResponseEntity<Page<UserResponseDto>> getUsersPaged(Pageable pageable) {
-        Page<User> usersPage = userService.getAllUsers(pageable);
-
-        Page<UserResponseDto> dtoPage = usersPage.map(u -> new UserResponseDto(
-                u.getEmail(),
-                u.getFirstName(),
-                u.getLastName(),
-                u.getPhoneNumber(),
-                u.getCreatedAt()));
-
-        return ResponseEntity.ok(dtoPage);
+    public ResponseEntity<Page<UserResponseDto>> getUsers(Pageable pageable) {
+        return ResponseEntity.ok(userService.getUsersPaged(pageable));
     }
 }

@@ -1,5 +1,6 @@
 package com.m01project.taskmanager.controller;
 
+import com.m01project.taskmanager.config.TestSecurityConfig;
 import com.m01project.taskmanager.demo.controller.UserController;
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.dto.UserResponseDto;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-@Import(GlobalExceptionHandler.class)
+@Import({GlobalExceptionHandler.class, TestSecurityConfig.class})
 @AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 

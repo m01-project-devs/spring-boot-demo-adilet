@@ -8,7 +8,9 @@ import com.m01project.taskmanager.demo.exception.UserNotFoundException;
 import com.m01project.taskmanager.demo.repository.UserRepository;
 import com.m01project.taskmanager.demo.service.UserService;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -84,5 +86,18 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
         userRepository.deleteById(user.getId());
+    }
+
+    // Pagination
+    @Override
+    public Page<UserResponseDto> getUsersPaged(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAll(pageable);
+
+        return usersPage.map(u -> new UserResponseDto(
+                u.getEmail(),
+                u.getFirstName(),
+                u.getLastName(),
+                u.getPhoneNumber(),
+                u.getCreatedAt()));
     }
 }

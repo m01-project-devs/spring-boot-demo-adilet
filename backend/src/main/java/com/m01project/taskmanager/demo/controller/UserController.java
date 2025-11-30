@@ -2,12 +2,16 @@ package com.m01project.taskmanager.demo.controller;
 
 import com.m01project.taskmanager.demo.dto.UserRequestDto;
 import com.m01project.taskmanager.demo.dto.UserResponseDto;
+import com.m01project.taskmanager.demo.entity.User;
 import com.m01project.taskmanager.demo.service.UserService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
-@Validated  
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -70,7 +74,7 @@ public class UserController {
     // PUT update user by email
     @PutMapping
     public ResponseEntity<UserResponseDto> updateUser(@RequestParam @NotBlank @Email String email,
-                                                      @RequestBody @Valid UserRequestDto dto) {
+            @RequestBody @Valid UserRequestDto dto) {
         UserResponseDto updated = userService.updateUserByEmail(email, dto);
         return ResponseEntity.ok(updated);
     }
@@ -80,5 +84,11 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@RequestParam @NotBlank @Email String email) {
         userService.deleteUserByEmail(email);
         return ResponseEntity.noContent().build();
+    }
+
+    // Pagination
+    @GetMapping("/paged")
+    public ResponseEntity<Page<UserResponseDto>> getUsers(Pageable pageable) {
+        return ResponseEntity.ok(userService.getUsersPaged(pageable));
     }
 }
